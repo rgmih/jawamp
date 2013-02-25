@@ -63,14 +63,26 @@ public class GenericTest {
     boolean welcomeReceived;
     
     @Test
-	public void testPrefix() throws Exception {
-		WebSocketClient wsClient = createClient();
+	public void testWelcome() throws Exception {
+		WebSocketClient client = createClient();
 		
-		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
-		client.bindPrefix("p", "http://example.com/");
-		client.call("p:add");
-		Thread.sleep(100);
+		welcomeReceived = false;
+		WebSocket.Connection connection = client.open(new URI("ws://localhost:8081/"), new WebSocket.OnTextMessage() {
+			@Override
+			public void onOpen(Connection connection) {}
+			
+			@Override
+			public void onClose(int closeCode, String message) {}
+			
+			@Override
+			public void onMessage(String json) {
+				Message message = MessageAdapter.parse(json);
+				assertTrue(message instanceof WelcomeMessage);
+				welcomeReceived = true;
+			}
+		}).get();
+		Thread.sleep(1000);
+		assertTrue("no WELCOME message received", welcomeReceived);
 		connection.close();
 	}
     
@@ -111,29 +123,46 @@ public class GenericTest {
 		}
 		Thread.sleep(100);
 		connection.close();
-	}   
+	}
     
-	@Test
-	public void testWelcome() throws Exception {
-		WebSocketClient client = createClient();
+    @Test
+	public void testPrefix() throws Exception {
+		WebSocketClient wsClient = createClient();
 		
-		welcomeReceived = false;
-		WebSocket.Connection connection = client.open(new URI("ws://localhost:8081/"), new WebSocket.OnTextMessage() {
-			@Override
-			public void onOpen(Connection connection) {}
-			
-			@Override
-			public void onClose(int closeCode, String message) {}
-			
-			@Override
-			public void onMessage(String json) {
-				Message message = MessageAdapter.parse(json);
-				assertTrue(message instanceof WelcomeMessage);
-				welcomeReceived = true;
-			}
-		}).get();
-		Thread.sleep(1000);
-		assertTrue("no WELCOME message received", welcomeReceived);
+		Client client = new JettyClient();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		client.bindPrefix("p", "http://example.com/");
+		Future<CallResult> future = client.call("p:add", new JsonPrimitive(4), new JsonPrimitive(-2));
+		try {
+			future.get();
+		} catch (ExecutionException e) {
+			fail("call to procURI with prefix failed");
+		}
+		
+		future = client.call("p:error");
+		try {
+			future.get();
+		} catch (ExecutionException e) {
+			CallError error = (CallError) e.getCause();
+			assertEquals("error URI not using prefix;", error.getErrorURI(), "p:error");
+		}
 		connection.close();
 	}
+    
+    @Test
+    public void testErrorDetails() throws Exception {
+    	WebSocketClient wsClient = createClient();
+		
+		Client client = new JettyClient();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		Future<CallResult> future = client.call("http://example.com/error");
+		try {
+			future.get();
+		} catch (ExecutionException e) {
+			CallError error = (CallError) e.getCause();
+			assertNotNull("error details not set", error.getErrorDetails());
+			assertEquals("error details invalid;", "details", error.getErrorDetails().getAsString());
+		}
+		connection.close();
+    }
 }

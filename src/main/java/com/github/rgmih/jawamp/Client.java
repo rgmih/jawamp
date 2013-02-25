@@ -1,6 +1,5 @@
 package com.github.rgmih.jawamp;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -100,7 +99,7 @@ public abstract class Client extends Connection {
 			CallErrorMessage callErrorMessage = (CallErrorMessage) message;
 			Call call = calls.get(callErrorMessage.getCallID());
 			if (call != null) {
-				call.setError(new CallError(callErrorMessage.getErrorURI(), callErrorMessage.getErrorDesc()));
+				call.setError(callErrorMessage.toError());
 			}
 		}
 			break;

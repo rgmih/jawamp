@@ -10,10 +10,12 @@ public class CallErrorMessage extends Message {
 	private JsonElement errorDetails;
 	
 	public CallErrorMessage(String callID, CallError error) {
-		super(MessageType.CALLERROR);
-		this.callID = callID;
-		this.errorURI = error.getErrorURI();
-		this.errorDesc = error.getErrorDesc();
+		this(callID, error.getErrorURI(), error.getErrorDesc(), error.getErrorDetails());
+	}
+	
+	public CallErrorMessage(String callID, String errorURI, CallError error) {
+		this(callID, error);
+		this.errorURI = errorURI;
 	}
 	
 	public CallErrorMessage(String callID, String errorURI, String errorDesc) {
@@ -24,10 +26,7 @@ public class CallErrorMessage extends Message {
 	}
 	
 	public CallErrorMessage(String callID, String errorURI, String errorDesc, JsonElement errorDetails) {
-		super(MessageType.CALLERROR);
-		this.callID = callID;
-		this.errorURI = errorURI;
-		this.errorDesc = errorDesc;
+		this(callID, errorURI, errorDesc);
 		this.errorDetails = errorDetails;
 	}
 
@@ -45,5 +44,9 @@ public class CallErrorMessage extends Message {
 
 	public JsonElement getErrorDetails() {
 		return errorDetails;
+	}
+	
+	public CallError toError() {
+		return new CallError(errorURI, errorDesc, errorDetails);
 	}
 }

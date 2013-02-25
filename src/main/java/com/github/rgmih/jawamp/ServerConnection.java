@@ -8,8 +8,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.JsonObject;
-
 public abstract class ServerConnection extends Connection {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ServerConnection.class);
@@ -47,12 +45,13 @@ public abstract class ServerConnection extends Connection {
 			CallMessage callMessage = (CallMessage) message;
 			logger.info("call message id='{}' received for procURI='{}'; connection={}", callMessage.getCallID(), callMessage.getProcURI(), id);
 			try {
-				CallResult result = server.call(callMessage.getProcURI(), callMessage.getArguments(), new Server.CallContext());
+				String procURI = tryParseCURIE(callMessage.getProcURI());
+				CallResult result = server.call(procURI, callMessage.getArguments(), new Server.CallContext());
 				logger.debug("call processed; sending CALLRESULT message; connection={}, call id={}", id, callMessage.getCallID());
 				sendMessage(new CallResultMessage(callMessage.getCallID(), result.getPayload()));
 			} catch (CallError e) {
 				logger.warn("call error occurred, sending CALLERROR; procURI={}, call id={}, connection={}", callMessage.getProcURI(), callMessage.getCallID(), id);
-				sendMessage(new CallErrorMessage(callMessage.getCallID(), e));
+				sendMessage(new CallErrorMessage(callMessage.getCallID(), toCURIE(e.getErrorURI()), e));
 			}
 			break;
 		default:
@@ -77,6 +76,17 @@ public abstract class ServerConnection extends Connection {
 			if (URI.startsWith(entry.getKey() + ":")) {
 				String s = entry.getValue() + URI.substring(entry.getKey().length() + 1);
 				logger.debug("found prefix={} binding for URI={}; parsed into {}", entry.getKey(), URI, s);
+				return s;
+			}
+		}
+		return URI;
+	}
+	
+	private String toCURIE(String URI) {
+		for (Entry<String, String> entry : prefixes.entrySet()) {
+			if (URI.startsWith(entry.getValue())) {
+				String s = entry.getKey() + ":" + URI.substring(entry.getValue().length());
+				logger.debug("found prefix={} binding for URI={}; using as {}", entry.getKey(), URI, s);
 				return s;
 			}
 		}
