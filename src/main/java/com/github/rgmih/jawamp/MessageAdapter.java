@@ -1,7 +1,9 @@
 package com.github.rgmih.jawamp;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -58,6 +60,32 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 			@Override
 			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
 				return new PrefixMessage(json.get(1).getAsString(), json.get(2).getAsString());
+			}
+		});
+		adapters.put(MessageType.CALL, new JsonProcessor() {
+			@Override
+			public JsonArray serialize(Message message, JsonSerializationContext context) {
+				CallMessage call = (CallMessage) message;
+				JsonArray array = serialize(context, message.getType(), call.getCallID(), call.getProcURI());
+				// TODO add arguments to array
+				return array;
+			}
+			@Override
+			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
+				List<JsonElement> arguments = new ArrayList<JsonElement>();
+				// TODO pass arguments
+				return new CallMessage(json.get(1).getAsString(), json.get(2).getAsString(), arguments);
+			}
+		});
+		adapters.put(MessageType.CALLRESULT, new JsonProcessor() {
+			@Override
+			public JsonArray serialize(Message message, JsonSerializationContext context) {
+				CallResultMessage callResult = (CallResultMessage) message;
+				return serialize(context, message.getType(), callResult.getCallID(), callResult.getPayload());
+			}
+			@Override
+			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
+				return new CallResultMessage(json.get(1).getAsString(), json.get(2));
 			}
 		});
 	}

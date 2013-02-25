@@ -5,6 +5,7 @@ public enum MessageType {
 	PREFIX,
 	CALL,
 	CALLRESULT,
+	CALLERROR,
 	SUBSCRIBE,
 	UNSUBSCRIBE,
 	PUBLISH,
