@@ -238,4 +238,42 @@ public class GenericTest {
 		
 		connection.close();
     }
+    
+    private boolean receivedA, receivedB;
+    
+    @Test
+    public void testPublishEligible() throws Exception {
+    	WebSocketClient wsClient = createClient();
+		Client clientA = new JettyClient();
+		WebSocket.Connection connectionA = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) clientA).get();
+		Client clientB = new JettyClient();
+		WebSocket.Connection connectionB = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) clientB).get();
+		receivedA = false;
+		receivedB = false;
+		clientA.subscribe("http://example.com/topic", new Client.Subscriber() {
+			@Override
+			public void onEvent(String topicURI, JsonElement event) {
+				receivedA = true;
+			}
+		});
+		clientB.subscribe("http://example.com/topic", new Client.Subscriber() {
+			@Override
+			public void onEvent(String topicURI, JsonElement event) {
+				receivedB = true;
+			}
+		});
+		
+		Thread.sleep(1000); // wait for WELCOME message
+		List<String> eligible = new ArrayList<String>();
+		eligible.add(clientB.getSessionID());
+		
+		clientA.publish("http://example.com/topic", new JsonPrimitive("event"), new ArrayList<String>(), eligible);
+		Thread.sleep(1000);
+		
+		assertFalse("client A must not receive event", receivedA);
+		assertTrue("client B must have received event", receivedB);
+		
+		connectionA.close();
+		connectionB.close();
+    }
 }

@@ -149,6 +149,14 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 						exclude.add(new JsonPrimitive(id));
 					}
 					array.add(exclude);
+					
+					if (publish.getEligible() != null) {
+						JsonArray eligible = new JsonArray();
+						for (String id : publish.getEligible()) {
+							eligible.add(new JsonPrimitive(id));
+						}
+						array.add(eligible);
+					}
 				}
 				return array;
 			}
@@ -156,6 +164,7 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
 				boolean excludeMe = false;
 				List<String> exclude = null;
+				List<String> eligible = null;
 				if (json.size() >= 4) {
 					JsonElement param = json.get(3);
 					if (param.isJsonArray()) {
@@ -164,6 +173,19 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 						for (JsonElement element : array) {
 							exclude.add(element.getAsString());
 						}
+						
+						if (json.size() >= 5) {
+							param = json.get(4);
+							if (param.isJsonArray()) {
+								eligible = new ArrayList<String>();
+								array = param.getAsJsonArray();
+								for (JsonElement element : array) {
+									eligible.add(element.getAsString());
+								}
+							} else {
+								// TODO unexpected
+							}
+						}
 					} else {
 						excludeMe = json.get(3).getAsBoolean();
 					}
@@ -171,7 +193,7 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 				if (excludeMe) {
 					return new PublishMessage(json.get(1).getAsString(), json.get(2), excludeMe);
 				} else {
-					return new PublishMessage(json.get(1).getAsString(), json.get(2), exclude);
+					return new PublishMessage(json.get(1).getAsString(), json.get(2), exclude, eligible);
 				}
 			}
 		});

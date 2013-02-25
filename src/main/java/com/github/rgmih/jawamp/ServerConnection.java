@@ -48,6 +48,10 @@ public abstract class ServerConnection extends Connection {
 						if (exclude != null && exclude.contains(id.toString())) {
 							excluded = true;
 						}
+						List<String> eligible = publishMessage.getEligible();
+						if (eligible != null && !eligible.contains(id.toString())) {
+							excluded = true;
+						}
 					}
 					published.remove(publishMessage);
 					
