@@ -143,18 +143,36 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 				JsonArray array = serialize(context, message.getType(), publish.getTopicURI(), publish.getEvent());
 				if (publish.isExcludeMe()) {
 					array.add(new JsonPrimitive(true));
+				} else if (publish.getExclude() != null) {
+					JsonArray exclude = new JsonArray();
+					for (String id : publish.getExclude()) {
+						exclude.add(new JsonPrimitive(id));
+					}
+					array.add(exclude);
 				}
 				return array;
 			}
 			@Override
 			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
 				boolean excludeMe = false;
-				if (json.size() == 5) {
-					
-				} else if (json.size() == 4) {
-					excludeMe = json.get(3).getAsBoolean();
+				List<String> exclude = null;
+				if (json.size() >= 4) {
+					JsonElement param = json.get(3);
+					if (param.isJsonArray()) {
+						exclude = new ArrayList<String>();
+						JsonArray array = param.getAsJsonArray();
+						for (JsonElement element : array) {
+							exclude.add(element.getAsString());
+						}
+					} else {
+						excludeMe = json.get(3).getAsBoolean();
+					}
 				}
-				return new PublishMessage(json.get(1).getAsString(), json.get(2), excludeMe);
+				if (excludeMe) {
+					return new PublishMessage(json.get(1).getAsString(), json.get(2), excludeMe);
+				} else {
+					return new PublishMessage(json.get(1).getAsString(), json.get(2), exclude);
+				}
 			}
 		});
 		adapters.put(MessageType.EVENT, new JsonProcessor() {

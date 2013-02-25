@@ -3,6 +3,7 @@ package com.github.rgmih.jawamp;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -42,6 +43,11 @@ public abstract class ServerConnection extends Connection {
 					boolean excluded = false;
 					if (published.contains(publishMessage) && publishMessage.isExcludeMe()) {
 						excluded = true;
+					} else {
+						List<String> exclude = publishMessage.getExclude();
+						if (exclude != null && exclude.contains(id.toString())) {
+							excluded = true;
+						}
 					}
 					published.remove(publishMessage);
 					

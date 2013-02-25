@@ -3,6 +3,8 @@ package com.github.rgmih.jawamp;
 import static org.junit.Assert.*;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -208,6 +210,29 @@ public class GenericTest {
 		});
 		eventReceived = false;
 		client.publish("http://example.com/topic", new JsonPrimitive("event"), true);
+		Thread.sleep(1000);
+		assertFalse("event was published, no exclusion", eventReceived);
+		
+		connection.close();
+    }
+    
+    @Test
+    public void testPublishExclude() throws Exception {
+    	WebSocketClient wsClient = createClient();
+		Client client = new JettyClient();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		
+		client.subscribe("http://example.com/topic", new Client.Subscriber() {
+			@Override
+			public void onEvent(String topicURI, JsonElement event) {
+				eventReceived = true;
+			}
+		});
+		eventReceived = false;
+		Thread.sleep(1000); // wait for WELCOME message
+		List<String> exclude = new ArrayList<String>();
+		exclude.add(client.getSessionID());
+		client.publish("http://example.com/topic", new JsonPrimitive("event"), exclude);
 		Thread.sleep(1000);
 		assertFalse("event was published, no exclusion", eventReceived);
 		

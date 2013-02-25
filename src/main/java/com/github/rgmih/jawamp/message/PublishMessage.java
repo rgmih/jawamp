@@ -18,12 +18,23 @@ public class PublishMessage extends Message {
 		this(topicURI, event, false);
 	}
 	
+	public PublishMessage(String topicURI, JsonElement event, List<String> exclude) {
+		this(topicURI, event, false);
+		this.exclude = exclude;
+	}
+	
 	public PublishMessage(String topicURI, JsonElement event, boolean excludeMe) {
 		super(MessageType.PUBLISH);
 		this.topicURI = topicURI;
 		this.event = event;
 		this.excludeMe = excludeMe;
 		eventMessage = new EventMessage(topicURI, event);
+	}
+	
+	public PublishMessage(String topicURI, JsonElement event, List<String> exclude, List<String> eligible) {
+		this(topicURI, event, false);
+		this.exclude = exclude;
+		this.eligible = eligible;
 	}
 
 	public String getTopicURI() {

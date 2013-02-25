@@ -2,6 +2,7 @@ package com.github.rgmih.jawamp;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -24,6 +25,7 @@ import com.github.rgmih.jawamp.message.Message;
 import com.github.rgmih.jawamp.message.PrefixMessage;
 import com.github.rgmih.jawamp.message.PublishMessage;
 import com.github.rgmih.jawamp.message.SubscribeMessage;
+import com.github.rgmih.jawamp.message.WelcomeMessage;
 import com.google.gson.JsonElement;
 
 public abstract class Client extends Connection {
@@ -93,6 +95,10 @@ public abstract class Client extends Connection {
 		logger.debug("message received; type={}", message.getType());
 		
 		switch (message.getType()) {
+		case WELCOME:
+			WelcomeMessage welcome = (WelcomeMessage) message;
+			sessionID = welcome.getSessionID();
+			break;
 		case CALLRESULT:
 		{
 			CallResultMessage callResultMessage = (CallResultMessage) message;
@@ -152,6 +158,10 @@ public abstract class Client extends Connection {
 		sendMessage(new PublishMessage(topicURI, event, excludeMe));
 	}
 	
+	public void publish(String topicURI, JsonElement event, List<String> exclude) {
+		sendMessage(new PublishMessage(topicURI, event, exclude));
+	}
+	
 	private void notifySubscribers(String topicURI, JsonElement event) {
 		Subscriber subscriber = subscribers.get(topicURI);
 		if (subscriber != null) {
@@ -159,5 +169,11 @@ public abstract class Client extends Connection {
 		} else {
 			logger.warn("no subscriber found for topicURI={}", topicURI);
 		}
+	}
+
+	private String sessionID = null;
+	
+	public String getSessionID() {
+		return sessionID;
 	}
 }
