@@ -16,6 +16,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.rgmih.jawamp.message.CallErrorMessage;
+import com.github.rgmih.jawamp.message.CallMessage;
+import com.github.rgmih.jawamp.message.CallResultMessage;
+import com.github.rgmih.jawamp.message.Message;
+import com.github.rgmih.jawamp.message.PrefixMessage;
+import com.github.rgmih.jawamp.message.PublishMessage;
+import com.github.rgmih.jawamp.message.SubscribeMessage;
 import com.google.gson.JsonElement;
 
 public abstract class Client extends Connection {

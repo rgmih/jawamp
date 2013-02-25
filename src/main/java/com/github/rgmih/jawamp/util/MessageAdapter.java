@@ -1,4 +1,4 @@
-package com.github.rgmih.jawamp;
+package com.github.rgmih.jawamp.util;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -9,6 +9,15 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.rgmih.jawamp.message.CallErrorMessage;
+import com.github.rgmih.jawamp.message.CallMessage;
+import com.github.rgmih.jawamp.message.CallResultMessage;
+import com.github.rgmih.jawamp.message.Message;
+import com.github.rgmih.jawamp.message.MessageType;
+import com.github.rgmih.jawamp.message.PrefixMessage;
+import com.github.rgmih.jawamp.message.PublishMessage;
+import com.github.rgmih.jawamp.message.SubscribeMessage;
+import com.github.rgmih.jawamp.message.WelcomeMessage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;

@@ -9,6 +9,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.rgmih.jawamp.message.PublishMessage;
 import com.google.gson.JsonElement;
 
 public class Server {

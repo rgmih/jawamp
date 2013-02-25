@@ -1,4 +1,4 @@
-package com.github.rgmih.jawamp;
+package com.github.rgmih.jawamp.message;
 
 public class PrefixMessage extends Message {
 	private String prefix;

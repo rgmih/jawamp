@@ -1,4 +1,4 @@
-package com.github.rgmih.jawamp;
+package com.github.rgmih.jawamp.message;
 
 import java.util.List;
 

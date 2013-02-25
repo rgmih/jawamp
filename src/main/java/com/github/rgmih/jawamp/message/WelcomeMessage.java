@@ -1,5 +1,4 @@
-package com.github.rgmih.jawamp;
-
+package com.github.rgmih.jawamp.message;
 
 public class WelcomeMessage extends Message {
 	private String sessionID;

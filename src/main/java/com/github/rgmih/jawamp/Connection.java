@@ -2,6 +2,9 @@ package com.github.rgmih.jawamp;
 
 import java.io.IOException;
 
+import com.github.rgmih.jawamp.message.Message;
+import com.github.rgmih.jawamp.util.MessageAdapter;
+
 public abstract class Connection {
 
 	// private static final Logger logger = LoggerFactory.getLogger(Connection.class);

@@ -1,5 +1,6 @@
-package com.github.rgmih.jawamp;
+package com.github.rgmih.jawamp.message;
 
+import com.github.rgmih.jawamp.CallError;
 import com.google.gson.JsonElement;
 
 public class CallErrorMessage extends Message {
