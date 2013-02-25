@@ -53,9 +53,13 @@ public class GenericTest {
 		return client;
     }
 
+    boolean welcomeReceived;
+    
 	@Test
 	public void testWelcome() throws Exception {
 		WebSocketClient client = createClient();
+		
+		welcomeReceived = false;
 		WebSocket.Connection connection = client.open(new URI("ws://localhost:8081/"), new WebSocket.OnTextMessage() {
 			private Connection connection;
 			
@@ -71,6 +75,7 @@ public class GenericTest {
 			public void onMessage(String json) {
 				Message message = MessageAdapter.parse(json);
 				assertTrue(message instanceof WelcomeMessage);
+				welcomeReceived = true;
 				
 				try {
 					connection.sendMessage(MessageAdapter.toJSON(new PrefixMessage("abc", "123456")));
@@ -80,6 +85,7 @@ public class GenericTest {
 			}
 		}).get();
 		Thread.sleep(1000);
+		assertTrue("no WELCOME message received", welcomeReceived);
 		connection.close();
 	}
 }
