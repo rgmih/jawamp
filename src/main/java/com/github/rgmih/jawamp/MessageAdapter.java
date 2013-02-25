@@ -115,6 +115,29 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 				}
 			}
 		});
+		adapters.put(MessageType.SUBSCRIBE, new JsonProcessor() {
+			@Override
+			public JsonArray serialize(Message message, JsonSerializationContext context) {
+				return serialize(context, message.getType(), ((SubscribeMessage) message).getTopicURI());
+			}
+			@Override
+			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
+				return new SubscribeMessage(json.get(1).getAsString());
+			}
+		});
+		adapters.put(MessageType.PUBLISH, new JsonProcessor() {
+			@Override
+			public JsonArray serialize(Message message, JsonSerializationContext context) {
+				PublishMessage publish = (PublishMessage) message;
+				JsonArray array = serialize(context, message.getType(), publish.getTopicURI(), publish.getEvent());
+				// TODO extra fields
+				return array;
+			}
+			@Override
+			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
+				return new PublishMessage(json.get(1).getAsString(), json.get(2));
+			}
+		});
 	}
 	
 	@Override
@@ -152,6 +175,6 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 		if (adapter != null) {
 			return adapter.serialize(message, context);
 		}
-		return null;
+		throw new RuntimeException("no adapter for message type=" + message.getType());
 	}
 }

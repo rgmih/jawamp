@@ -1,8 +1,10 @@
 package com.github.rgmih.jawamp;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,22 @@ public class Server {
 		} else {
 			logger.warn("no handler registered for procURI='{}'; error", procURI);
 			throw new CallError(procURI, "procURI not supported");
+		}
+	}
+	
+	public static abstract class Listener {
+		public void onPublish(PublishMessage message) {}
+	}
+	
+	private final Set<Listener> listeners = new HashSet<Listener>();
+	
+	public void addListener(Listener listener) {
+		listeners.add(listener);
+	}
+	
+	public void publish(PublishMessage message) {
+		for (Listener listener : listeners) {
+			listener.onPublish(message);
 		}
 	}
 }

@@ -16,6 +16,12 @@ public abstract class ServerConnection extends Connection {
 	
 	public ServerConnection(Server server) {
 		this.server = server;
+		this.server.addListener(new Server.Listener() {
+			@Override
+			public void onPublish(PublishMessage message) {
+				sendMessage(message);
+			}
+		});
 		logger.info("connection created; connection={}", id);
 	}
 	
@@ -53,6 +59,16 @@ public abstract class ServerConnection extends Connection {
 				logger.warn("call error occurred, sending CALLERROR; procURI={}, call id={}, connection={}", callMessage.getProcURI(), callMessage.getCallID(), id);
 				sendMessage(new CallErrorMessage(callMessage.getCallID(), toCURIE(e.getErrorURI()), e));
 			}
+			break;
+		case SUBSCRIBE:
+			SubscribeMessage subscribeMessage = (SubscribeMessage) message;
+			String topicURI = tryParseCURIE(subscribeMessage.getTopicURI());
+			logger.info("subscribing to topicURI='{}'; connection={}", topicURI, id);
+			break;
+		case PUBLISH:
+			PublishMessage publishMessage = (PublishMessage) message;
+			logger.info("event published for topicURI={}; connection={}", publishMessage.getTopicURI(), id);
+			server.publish(publishMessage);
 			break;
 		default:
 			logger.warn("unexpected message type={}; connection={}", message.getType());

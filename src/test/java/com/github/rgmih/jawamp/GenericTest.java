@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 
@@ -163,6 +164,27 @@ public class GenericTest {
 			assertNotNull("error details not set", error.getErrorDetails());
 			assertEquals("error details invalid;", "details", error.getErrorDetails().getAsString());
 		}
+		connection.close();
+    }
+    
+    private boolean eventReceived = false;
+    @Test
+    public void testPubSub() throws Exception {
+    	WebSocketClient wsClient = createClient();
+		Client client = new JettyClient();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		
+		client.subscribe("http://example.com/topic", new Client.Subscriber() {
+			@Override
+			public void onEvent(String topicURI, JsonElement event) {
+				eventReceived = true;
+			}
+		});
+		eventReceived = false;
+		client.publish("http://example.com/topic", new JsonPrimitive("event"));
+		Thread.sleep(1000);
+		assertTrue("event not published", eventReceived);
+		
 		connection.close();
     }
 }

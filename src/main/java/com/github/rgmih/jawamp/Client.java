@@ -102,6 +102,9 @@ public abstract class Client extends Connection {
 				call.setError(callErrorMessage.toError());
 			}
 		}
+		case PUBLISH:
+			PublishMessage publishMessage = (PublishMessage) message;
+			notifySubscribers(publishMessage.getTopicURI(), publishMessage.getEvent());
 			break;
 		default:
 			break;
@@ -112,14 +115,6 @@ public abstract class Client extends Connection {
 		sendMessage(new PrefixMessage(prefix, URI));
 	}
 
-	// private static class CallTask extends FutureTask<CallResult> implements
-	// Callable<CallResult> {
-	//
-	// public CallTask() {
-	// super()
-	// }
-	// }
-
 	public Future<CallResult> call(String procURI, JsonElement... arguments) {
 		UUID callID = UUID.randomUUID();
 		Call callable = new Call(new CallMessage(callID.toString(), procURI, Arrays.asList(arguments)));
@@ -127,5 +122,29 @@ public abstract class Client extends Connection {
 		FutureTask<CallResult> task = new FutureTask<CallResult>(callable);
 		threadpool.execute(task);
 		return task;
+	}
+
+	public static interface Subscriber {
+		void onEvent(String topicURI, JsonElement event);
+	}
+	
+	private final Map<String, Subscriber> subscribers = new HashMap<String, Subscriber>();
+	
+	public void subscribe(String topicURI, Subscriber subsciber) {
+		subscribers.put(topicURI, subsciber);
+		sendMessage(new SubscribeMessage(topicURI));
+	}
+	
+	public void publish(String topicURI, JsonElement event) {
+		sendMessage(new PublishMessage(topicURI, event));
+	}
+	
+	private void notifySubscribers(String topicURI, JsonElement event) {
+		Subscriber subscriber = subscribers.get(topicURI);
+		if (subscriber != null) {
+			subscriber.onEvent(topicURI, event);
+		} else {
+			logger.warn("no subscriber found for topicURI={}", topicURI);
+		}
 	}
 }
