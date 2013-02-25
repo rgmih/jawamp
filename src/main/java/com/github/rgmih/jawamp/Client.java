@@ -148,6 +148,10 @@ public abstract class Client extends Connection {
 		sendMessage(new PublishMessage(topicURI, event));
 	}
 	
+	public void publish(String topicURI, JsonElement event, boolean excludeMe) {
+		sendMessage(new PublishMessage(topicURI, event, excludeMe));
+	}
+	
 	private void notifySubscribers(String topicURI, JsonElement event) {
 		Subscriber subscriber = subscribers.get(topicURI);
 		if (subscriber != null) {

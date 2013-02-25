@@ -1,9 +1,6 @@
 package com.github.rgmih.jawamp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.net.URI;
 import java.util.concurrent.ExecutionException;
@@ -174,6 +171,7 @@ public class GenericTest {
     }
     
     private boolean eventReceived = false;
+    
     @Test
     public void testPubSub() throws Exception {
     	WebSocketClient wsClient = createClient();
@@ -192,6 +190,26 @@ public class GenericTest {
 		client.publish("http://example.com/topic", new JsonPrimitive("event"));
 		Thread.sleep(1000);
 		assertTrue("event not published", eventReceived);
+		
+		connection.close();
+    }
+    
+    @Test
+    public void testPublishExcludeMe() throws Exception {
+    	WebSocketClient wsClient = createClient();
+		Client client = new JettyClient();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		
+		client.subscribe("http://example.com/topic", new Client.Subscriber() {
+			@Override
+			public void onEvent(String topicURI, JsonElement event) {
+				eventReceived = true;
+			}
+		});
+		eventReceived = false;
+		client.publish("http://example.com/topic", new JsonPrimitive("event"), true);
+		Thread.sleep(1000);
+		assertFalse("event was published, no exclusion", eventReceived);
 		
 		connection.close();
     }

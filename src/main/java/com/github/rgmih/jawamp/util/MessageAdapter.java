@@ -26,6 +26,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
@@ -140,12 +141,20 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 			public JsonArray serialize(Message message, JsonSerializationContext context) {
 				PublishMessage publish = (PublishMessage) message;
 				JsonArray array = serialize(context, message.getType(), publish.getTopicURI(), publish.getEvent());
-				// TODO extra fields
+				if (publish.isExcludeMe()) {
+					array.add(new JsonPrimitive(true));
+				}
 				return array;
 			}
 			@Override
 			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
-				return new PublishMessage(json.get(1).getAsString(), json.get(2));
+				boolean excludeMe = false;
+				if (json.size() == 5) {
+					
+				} else if (json.size() == 4) {
+					excludeMe = json.get(3).getAsBoolean();
+				}
+				return new PublishMessage(json.get(1).getAsString(), json.get(2), excludeMe);
 			}
 		});
 		adapters.put(MessageType.EVENT, new JsonProcessor() {

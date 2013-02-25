@@ -1,11 +1,13 @@
 package com.github.rgmih.jawamp;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +30,24 @@ public abstract class ServerConnection extends Connection {
 	private final Server server;
 	private UUID id = UUID.randomUUID();
 	
+	private Set<PublishMessage> published = Collections.newSetFromMap(new ConcurrentHashMap<PublishMessage, Boolean>());
+	
 	public ServerConnection(Server server) {
 		this.server = server;
 		this.server.addListener(new Server.Listener() {
 			@Override
 			public void onMessage(Message message) {
 				if (message.getType() == MessageType.PUBLISH) {
-					PublishMessage publish = (PublishMessage) message;
-					sendMessage(publish.toEventMessage());
+					PublishMessage publishMessage = (PublishMessage) message;
+					boolean excluded = false;
+					if (published.contains(publishMessage) && publishMessage.isExcludeMe()) {
+						excluded = true;
+					}
+					published.remove(publishMessage);
+					
+					if (!excluded) {
+						sendMessage(publishMessage.toEventMessage());
+					}
 				}
 			}
 		});
@@ -94,6 +106,7 @@ public abstract class ServerConnection extends Connection {
 			break;
 		case PUBLISH:
 			PublishMessage publishMessage = (PublishMessage) message;
+			published.add(publishMessage);
 			logger.info("event published for topicURI={}; connection={}", publishMessage.getTopicURI(), id);
 			break;
 		default:
