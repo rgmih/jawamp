@@ -96,6 +96,25 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 				return new CallResultMessage(json.get(1).getAsString(), json.get(2));
 			}
 		});
+		adapters.put(MessageType.CALLERROR, new JsonProcessor() {
+			@Override
+			public JsonArray serialize(Message message, JsonSerializationContext context) {
+				CallErrorMessage callError = (CallErrorMessage) message;
+				JsonArray array = serialize(context, message.getType(), callError.getCallID(), callError.getErrorURI(), callError.getErrorDesc());
+				if (callError.getErrorDetails() != null) {
+					array.add(callError.getErrorDetails());
+				}
+				return array;
+			}
+			@Override
+			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
+				if (json.size() > 4) {
+					return new CallErrorMessage(json.get(1).getAsString(), json.get(2).getAsString(), json.get(3).getAsString(), json.get(4));
+				} else {
+					return new CallErrorMessage(json.get(1).getAsString(), json.get(2).getAsString(), json.get(3).getAsString());
+				}
+			}
+		});
 	}
 	
 	@Override

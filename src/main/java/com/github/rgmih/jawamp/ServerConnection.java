@@ -51,8 +51,8 @@ public abstract class ServerConnection extends Connection {
 				logger.debug("call processed; sending CALLRESULT message; connection={}, call id={}", id, callMessage.getCallID());
 				sendMessage(new CallResultMessage(callMessage.getCallID(), result.getPayload()));
 			} catch (CallError e) {
-				// TODO
 				logger.warn("call error occurred, sending CALLERROR; procURI={}, call id={}, connection={}", callMessage.getProcURI(), callMessage.getCallID(), id);
+				sendMessage(new CallErrorMessage(callMessage.getCallID(), e));
 			}
 			break;
 		default:

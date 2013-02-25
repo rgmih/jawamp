@@ -92,6 +92,27 @@ public class GenericTest {
 		connection.close();
 	}   
     
+    @Test
+	public void testCallError() throws Exception {
+		WebSocketClient wsClient = createClient();
+		
+		Client client = new JettyClient();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		Future<CallResult> future = client.call("http://example.com/error");
+		try {
+			future.get();
+			fail("call error expected");
+		} catch (ExecutionException e) {
+			Throwable t = e.getCause();
+			assertTrue("error type != CallError", t instanceof CallError);
+			CallError callError = (CallError) t;
+			assertTrue("call error URI not passed", "http://example.com/error".equals(callError.getErrorURI()));
+			assertTrue("call error description not passed", "error description".equals(callError.getErrorDesc()));
+		}
+		Thread.sleep(100);
+		connection.close();
+	}   
+    
 	@Test
 	public void testWelcome() throws Exception {
 		WebSocketClient client = createClient();

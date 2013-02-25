@@ -87,19 +87,22 @@ public abstract class Client extends Connection {
 		
 		switch (message.getType()) {
 		case CALLRESULT:
+		{
 			CallResultMessage callResultMessage = (CallResultMessage) message;
 			Call call = calls.get(callResultMessage.getCallID());
 			if (call != null) {
 				call.setResult(new CallResult(callResultMessage.getPayload()));
 			}
+		}
 			break;
 		case CALLERROR:
-//			CallErrorMessage callError = (CallErrorMessage) message;
-//			Call call = calls.get(callResult.getCallID());
-//			if (call != null) {
-//				// TODO parse payload
-//				call.setResult(new CallResult(null));
-//			}
+		{
+			CallErrorMessage callErrorMessage = (CallErrorMessage) message;
+			Call call = calls.get(callErrorMessage.getCallID());
+			if (call != null) {
+				call.setError(new CallError(callErrorMessage.getErrorURI(), callErrorMessage.getErrorDesc()));
+			}
+		}
 			break;
 		default:
 			break;
