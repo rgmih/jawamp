@@ -184,6 +184,8 @@ public class GenericTest {
 			@Override
 			public void onEvent(String topicURI, JsonElement event) {
 				eventReceived = true;
+				assertEquals("event topic is invalid;", topicURI, "http://example.com/topic");
+				assertEquals("event payload is invalid;", "event", event.getAsString());
 			}
 		});
 		eventReceived = false;

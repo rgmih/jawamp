@@ -9,9 +9,9 @@ public abstract class Connection {
 
 	// private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 	
-	public void onOpen() {}
+	protected void onOpen() {}
 	
-	public void onClose() {}
+	protected void onClose() {}
 	
 	protected abstract void onMessage(Message message);
 	

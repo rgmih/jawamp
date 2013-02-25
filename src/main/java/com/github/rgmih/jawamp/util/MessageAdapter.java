@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.github.rgmih.jawamp.message.CallErrorMessage;
 import com.github.rgmih.jawamp.message.CallMessage;
 import com.github.rgmih.jawamp.message.CallResultMessage;
+import com.github.rgmih.jawamp.message.EventMessage;
 import com.github.rgmih.jawamp.message.Message;
 import com.github.rgmih.jawamp.message.MessageType;
 import com.github.rgmih.jawamp.message.PrefixMessage;
@@ -145,6 +146,17 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 			@Override
 			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
 				return new PublishMessage(json.get(1).getAsString(), json.get(2));
+			}
+		});
+		adapters.put(MessageType.EVENT, new JsonProcessor() {
+			@Override
+			public JsonArray serialize(Message message, JsonSerializationContext context) {
+				EventMessage eventMessage = (EventMessage) message;
+				return serialize(context, message.getType(), eventMessage.getTopicURI(), eventMessage.getEvent());
+			}
+			@Override
+			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
+				return new EventMessage(json.get(1).getAsString(), json.get(2));
 			}
 		});
 	}

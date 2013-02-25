@@ -9,7 +9,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.rgmih.jawamp.message.PublishMessage;
+import com.github.rgmih.jawamp.message.Message;
 import com.google.gson.JsonElement;
 
 public class Server {
@@ -17,12 +17,8 @@ public class Server {
 	
 	private static final Logger logger = LoggerFactory.getLogger(Server.class);
 	
-	public static class CallContext {
-		
-	}
-	
 	public static interface CallHandler {
-		CallResult invoke(String procURI, List<JsonElement> arguments, CallContext context) throws CallError;
+		CallResult invoke(String procURI, List<JsonElement> arguments, ServerConnection connection) throws CallError;
 	}
 
 	protected final Map<String, CallHandler> callHandlers = new HashMap<String, CallHandler>();
@@ -36,19 +32,19 @@ public class Server {
 		
 	}
 	
-	public CallResult call(String procURI, List<JsonElement> arguments, CallContext context) throws CallError {
+	public CallResult call(String procURI, List<JsonElement> arguments, ServerConnection connection) throws CallError {
 		CallHandler handler = callHandlers.get(procURI);
 		if (handler != null) {
 			logger.debug("handler found for procURI={}; processing call", procURI);
-			return handler.invoke(procURI, arguments, context);
+			return handler.invoke(procURI, arguments, connection);
 		} else {
 			logger.warn("no handler registered for procURI='{}'; error", procURI);
 			throw new CallError(procURI, "procURI not supported");
 		}
 	}
 	
-	public static abstract class Listener {
-		public void onPublish(PublishMessage message) {}
+	public static interface Listener {
+		public void onMessage(Message message);
 	}
 	
 	private final Set<Listener> listeners = new HashSet<Listener>();
@@ -57,9 +53,13 @@ public class Server {
 		listeners.add(listener);
 	}
 	
-	public void publish(PublishMessage message) {
+	public void removeListener(Listener listener) {
+		listeners.remove(listener);
+	}
+	
+	public void onMessage(Message message) {
 		for (Listener listener : listeners) {
-			listener.onPublish(message);
+			listener.onMessage(message);
 		}
 	}
 }

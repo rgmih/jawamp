@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.github.rgmih.jawamp.message.CallErrorMessage;
 import com.github.rgmih.jawamp.message.CallMessage;
 import com.github.rgmih.jawamp.message.CallResultMessage;
+import com.github.rgmih.jawamp.message.EventMessage;
 import com.github.rgmih.jawamp.message.Message;
 import com.github.rgmih.jawamp.message.PrefixMessage;
 import com.github.rgmih.jawamp.message.PublishMessage;
@@ -109,9 +110,10 @@ public abstract class Client extends Connection {
 				call.setError(callErrorMessage.toError());
 			}
 		}
-		case PUBLISH:
-			PublishMessage publishMessage = (PublishMessage) message;
-			notifySubscribers(publishMessage.getTopicURI(), publishMessage.getEvent());
+			break;
+		case EVENT:
+			EventMessage eventMessage = (EventMessage) message;
+			notifySubscribers(eventMessage.getTopicURI(), eventMessage.getEvent());
 			break;
 		default:
 			break;

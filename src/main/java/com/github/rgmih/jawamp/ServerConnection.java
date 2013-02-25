@@ -1,7 +1,9 @@
 package com.github.rgmih.jawamp;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -12,6 +14,7 @@ import com.github.rgmih.jawamp.message.CallErrorMessage;
 import com.github.rgmih.jawamp.message.CallMessage;
 import com.github.rgmih.jawamp.message.CallResultMessage;
 import com.github.rgmih.jawamp.message.Message;
+import com.github.rgmih.jawamp.message.MessageType;
 import com.github.rgmih.jawamp.message.PrefixMessage;
 import com.github.rgmih.jawamp.message.PublishMessage;
 import com.github.rgmih.jawamp.message.SubscribeMessage;
@@ -23,22 +26,36 @@ public abstract class ServerConnection extends Connection {
 	private static final Logger logger = LoggerFactory.getLogger(ServerConnection.class);
 	
 	private final Server server;
+	private UUID id = UUID.randomUUID();
 	
 	public ServerConnection(Server server) {
 		this.server = server;
 		this.server.addListener(new Server.Listener() {
 			@Override
-			public void onPublish(PublishMessage message) {
-				sendMessage(message);
+			public void onMessage(Message message) {
+				if (message.getType() == MessageType.PUBLISH) {
+					PublishMessage publish = (PublishMessage) message;
+					sendMessage(publish.toEventMessage());
+				}
 			}
 		});
 		logger.info("connection created; connection={}", id);
 	}
 	
-	UUID id = UUID.randomUUID();
+	private Set<String> topics = new HashSet<String>();
+	
+	public void subscribe(String topicURI) {
+		topics.add(topicURI);
+		logger.info("subscribed to '{}'; connection={}", topicURI, id);
+	}
+	
+	public void unsubscribe(String topicURI) {
+		topics.remove(topicURI);
+		logger.info("unsubscribed from '{}'; connection={}", topicURI, id);
+	}
 	
 	@Override
-	public void onOpen() {
+	protected void onOpen() {
 		super.onOpen();
 		
 		logger.info("connection opened, sending WELCOME; connection={}", id);
@@ -46,7 +63,6 @@ public abstract class ServerConnection extends Connection {
 		sendMessage(new WelcomeMessage(id.toString(), 1, Server.IDENT));
 		logger.debug("WELCOME message sent; connection connection={}, protocolVersion=1, serverIdent={}", id, Server.IDENT);
 	}
-
 
 	@Override
 	protected void onMessage(Message message) {
@@ -62,7 +78,7 @@ public abstract class ServerConnection extends Connection {
 			logger.info("call message id='{}' received for procURI='{}'; connection={}", callMessage.getCallID(), callMessage.getProcURI(), id);
 			try {
 				String procURI = tryParseCURIE(callMessage.getProcURI());
-				CallResult result = server.call(procURI, callMessage.getArguments(), new Server.CallContext());
+				CallResult result = server.call(procURI, callMessage.getArguments(), this);
 				logger.debug("call processed; sending CALLRESULT message; connection={}, call id={}", id, callMessage.getCallID());
 				sendMessage(new CallResultMessage(callMessage.getCallID(), result.getPayload()));
 			} catch (CallError e) {
@@ -74,16 +90,18 @@ public abstract class ServerConnection extends Connection {
 			SubscribeMessage subscribeMessage = (SubscribeMessage) message;
 			String topicURI = tryParseCURIE(subscribeMessage.getTopicURI());
 			logger.info("subscribing to topicURI='{}'; connection={}", topicURI, id);
+			subscribe(topicURI);
 			break;
 		case PUBLISH:
 			PublishMessage publishMessage = (PublishMessage) message;
 			logger.info("event published for topicURI={}; connection={}", publishMessage.getTopicURI(), id);
-			server.publish(publishMessage);
 			break;
 		default:
 			logger.warn("unexpected message type={}; connection={}", message.getType());
 			break;
 		}
+		
+		server.onMessage(message);
 	}
 
 	private final Map<String, String> prefixes = new HashMap<String, String>();
