@@ -18,6 +18,7 @@ import com.github.rgmih.jawamp.message.MessageType;
 import com.github.rgmih.jawamp.message.PrefixMessage;
 import com.github.rgmih.jawamp.message.PublishMessage;
 import com.github.rgmih.jawamp.message.SubscribeMessage;
+import com.github.rgmih.jawamp.message.UnsubscribeMessage;
 import com.github.rgmih.jawamp.message.WelcomeMessage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -206,6 +207,16 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 			@Override
 			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
 				return new EventMessage(json.get(1).getAsString(), json.get(2));
+			}
+		});
+		adapters.put(MessageType.UNSUBSCRIBE, new JsonProcessor() {
+			@Override
+			public JsonArray serialize(Message message, JsonSerializationContext context) {
+				return serialize(context, message.getType(), ((UnsubscribeMessage) message).getTopicURI());
+			}
+			@Override
+			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
+				return new UnsubscribeMessage(json.get(1).getAsString());
 			}
 		});
 	}

@@ -25,6 +25,7 @@ import com.github.rgmih.jawamp.message.Message;
 import com.github.rgmih.jawamp.message.PrefixMessage;
 import com.github.rgmih.jawamp.message.PublishMessage;
 import com.github.rgmih.jawamp.message.SubscribeMessage;
+import com.github.rgmih.jawamp.message.UnsubscribeMessage;
 import com.github.rgmih.jawamp.message.WelcomeMessage;
 import com.google.gson.JsonElement;
 
@@ -164,6 +165,11 @@ public abstract class Client extends Connection {
 	
 	public void publish(String topicURI, JsonElement event, List<String> exclude, List<String> eligible) {
 		sendMessage(new PublishMessage(topicURI, event, exclude, eligible));
+	}
+	
+	public void unsubscribe(String topicURI) {
+		sendMessage(new UnsubscribeMessage(topicURI));
+		subscribers.remove(topicURI);
 	}
 	
 	private void notifySubscribers(String topicURI, JsonElement event) {

@@ -276,4 +276,30 @@ public class GenericTest {
 		connectionA.close();
 		connectionB.close();
     }
+    
+    private int eventsReceived;
+    @Test
+    public void testUnsubscribe() throws Exception {
+    	WebSocketClient wsClient = createClient();
+		Client client = new JettyClient();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		
+		client.subscribe("http://example.com/topic", new Client.Subscriber() {
+			@Override
+			public void onEvent(String topicURI, JsonElement event) {
+				eventsReceived++;
+			}
+		});
+		eventsReceived = 0;
+		client.publish("http://example.com/topic", new JsonPrimitive("event"));
+		Thread.sleep(1000);
+		
+		client.unsubscribe("http://example.com/topic");
+		client.publish("http://example.com/topic", new JsonPrimitive("event"));
+		Thread.sleep(1000);
+		
+		assertEquals("too many events;", 1, eventsReceived);
+		
+		connection.close();
+    }
 }

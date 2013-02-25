@@ -21,6 +21,7 @@ import com.github.rgmih.jawamp.message.MessageType;
 import com.github.rgmih.jawamp.message.PrefixMessage;
 import com.github.rgmih.jawamp.message.PublishMessage;
 import com.github.rgmih.jawamp.message.SubscribeMessage;
+import com.github.rgmih.jawamp.message.UnsubscribeMessage;
 import com.github.rgmih.jawamp.message.WelcomeMessage;
 
 
@@ -40,6 +41,12 @@ public abstract class ServerConnection extends Connection {
 			public void onMessage(Message message) {
 				if (message.getType() == MessageType.PUBLISH) {
 					PublishMessage publishMessage = (PublishMessage) message;
+					// check topicURI
+					if (!topics.contains(publishMessage.getTopicURI())) {
+						return;
+					}
+					
+					// check excludeMe/exclude/eligible
 					boolean excluded = false;
 					if (published.contains(publishMessage) && publishMessage.isExcludeMe()) {
 						excluded = true;
@@ -109,15 +116,25 @@ public abstract class ServerConnection extends Connection {
 			}
 			break;
 		case SUBSCRIBE:
+		{
 			SubscribeMessage subscribeMessage = (SubscribeMessage) message;
 			String topicURI = tryParseCURIE(subscribeMessage.getTopicURI());
 			logger.info("subscribing to topicURI='{}'; connection={}", topicURI, id);
 			subscribe(topicURI);
+		}
 			break;
 		case PUBLISH:
 			PublishMessage publishMessage = (PublishMessage) message;
 			published.add(publishMessage);
 			logger.info("event published for topicURI={}; connection={}", publishMessage.getTopicURI(), id);
+			break;
+		case UNSUBSCRIBE:
+		{
+			UnsubscribeMessage unsubscribeMessage = (UnsubscribeMessage) message;
+			String topicURI = tryParseCURIE(unsubscribeMessage.getTopicURI());
+			logger.info("unsubscribing from topicURI='{}'; connection={}", topicURI, id);
+			unsubscribe(topicURI);
+		}
 			break;
 		default:
 			logger.warn("unexpected message type={}; connection={}", message.getType());
