@@ -18,8 +18,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.rgmih.jawamp.Server.CallError;
-import com.github.rgmih.jawamp.Server.CallResult;
+import com.google.gson.JsonPrimitive;
+
 
 public class GenericTest {
 	
@@ -80,10 +80,11 @@ public class GenericTest {
 		
 		Client client = new JettyClient();
 		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
-		Future<CallResult> future = client.call("http://example.com/empty");
+		Future<CallResult> future = client.call("http://example.com/add", new JsonPrimitive(2), new JsonPrimitive(3));
 		try {
 			CallResult result = future.get();
-			logger.debug("call result received");
+			int z = result.getPayload().getAsInt();
+			assertTrue("2 + 3 != 5", z == 5);
 		} catch (ExecutionException e) {
 			
 		}

@@ -1,6 +1,7 @@
 package com.github.rgmih.jawamp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -16,8 +17,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.rgmih.jawamp.Server.CallError;
-import com.github.rgmih.jawamp.Server.CallResult;
 import com.google.gson.JsonElement;
 
 public abstract class Client extends Connection {
@@ -88,11 +87,10 @@ public abstract class Client extends Connection {
 		
 		switch (message.getType()) {
 		case CALLRESULT:
-			CallResultMessage callResult = (CallResultMessage) message;
-			Call call = calls.get(callResult.getCallID());
+			CallResultMessage callResultMessage = (CallResultMessage) message;
+			Call call = calls.get(callResultMessage.getCallID());
 			if (call != null) {
-				// TODO parse payload
-				call.setResult(new CallResult(null));
+				call.setResult(new CallResult(callResultMessage.getPayload()));
 			}
 			break;
 		case CALLERROR:
@@ -120,9 +118,9 @@ public abstract class Client extends Connection {
 	// }
 	// }
 
-	public Future<CallResult> call(String procURI, Object... arguments) {
+	public Future<CallResult> call(String procURI, JsonElement... arguments) {
 		UUID callID = UUID.randomUUID();
-		Call callable = new Call(new CallMessage(callID.toString(), procURI, new ArrayList<JsonElement>()));
+		Call callable = new Call(new CallMessage(callID.toString(), procURI, Arrays.asList(arguments)));
 		calls.put(callID.toString(), callable);
 		FutureTask<CallResult> task = new FutureTask<CallResult>(callable);
 		threadpool.execute(task);

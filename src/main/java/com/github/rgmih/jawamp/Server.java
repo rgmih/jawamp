@@ -14,26 +14,6 @@ public class Server {
 	
 	private static final Logger logger = LoggerFactory.getLogger(Server.class);
 	
-	public static class CallResult {
-		private Object payload;
-		
-		public CallResult(Object payload) {
-			this.payload = payload;
-		}
-		public Object getPayload() {
-			return payload;
-		}
-	}
-	
-	public static class CallError extends Exception {
-
-		private static final long serialVersionUID = 551481029545370660L;
-		
-		public CallError(String procURI, String message) {
-			super(message);
-		}
-	}
-	
 	public static class CallContext {
 		
 	}

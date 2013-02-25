@@ -8,8 +8,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.rgmih.jawamp.Server.CallError;
-import com.github.rgmih.jawamp.Server.CallResult;
 import com.google.gson.JsonObject;
 
 public abstract class ServerConnection extends Connection {
@@ -51,7 +49,7 @@ public abstract class ServerConnection extends Connection {
 			try {
 				CallResult result = server.call(callMessage.getProcURI(), callMessage.getArguments(), new Server.CallContext());
 				logger.debug("call processed; sending CALLRESULT message; connection={}, call id={}", id, callMessage.getCallID());
-				sendMessage(new CallResultMessage(callMessage.getCallID(), new JsonObject()));
+				sendMessage(new CallResultMessage(callMessage.getCallID(), result.getPayload()));
 			} catch (CallError e) {
 				// TODO
 				logger.warn("call error occurred, sending CALLERROR; procURI={}, call id={}, connection={}", callMessage.getProcURI(), callMessage.getCallID(), id);

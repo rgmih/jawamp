@@ -27,7 +27,11 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 		public static JsonArray serialize(JsonSerializationContext context, Object... items) {
 			JsonArray array = new JsonArray();
 			for (Object item : items) {
-				array.add(context.serialize(item));
+				if (item instanceof JsonElement) {
+					array.add((JsonElement) item);
+				} else {
+					array.add(context.serialize(item));
+				}
 			}
 			return array;
 		}
@@ -67,13 +71,17 @@ public class MessageAdapter implements JsonDeserializer<Message>, JsonSerializer
 			public JsonArray serialize(Message message, JsonSerializationContext context) {
 				CallMessage call = (CallMessage) message;
 				JsonArray array = serialize(context, message.getType(), call.getCallID(), call.getProcURI());
-				// TODO add arguments to array
+				for (JsonElement element : call.getArguments()) {
+					array.add(element);
+				}
 				return array;
 			}
 			@Override
 			public Message deserialize(JsonArray json, JsonDeserializationContext context) throws JsonParseException {
 				List<JsonElement> arguments = new ArrayList<JsonElement>();
-				// TODO pass arguments
+				for (int i = 3; i < json.size(); ++i) {
+					arguments.add(json.get(i));
+				}
 				return new CallMessage(json.get(1).getAsString(), json.get(2).getAsString(), arguments);
 			}
 		});
