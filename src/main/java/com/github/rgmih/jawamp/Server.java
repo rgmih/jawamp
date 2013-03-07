@@ -45,6 +45,7 @@ public class Server {
 	
 	public static interface Listener {
 		public void onMessage(Message message);
+		public void onConnectionClosed(ServerConnection connection);
 	}
 	
 	private final Set<Listener> listeners = new HashSet<Listener>();
@@ -60,6 +61,12 @@ public class Server {
 	public void onMessage(Message message) {
 		for (Listener listener : listeners) {
 			listener.onMessage(message);
+		}
+	}
+	
+	public void onConnectionClosed(ServerConnection connection) {
+		for (Listener listener : listeners) {
+			listener.onConnectionClosed(connection);
 		}
 	}
 }

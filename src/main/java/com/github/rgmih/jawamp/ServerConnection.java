@@ -67,6 +67,9 @@ public abstract class ServerConnection extends Connection {
 					}
 				}
 			}
+
+			@Override
+			public void onConnectionClosed(ServerConnection connection) {}
 		});
 		logger.info("connection created; connection={}", id);
 	}
