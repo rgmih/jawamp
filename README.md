@@ -8,9 +8,15 @@ processing as well. Sometimes you just have to dive deeper — handle connection
 Quick start
 -----------
 
-No public repo available. Deploy jawamp on local machine or server (take a look at [Artifactory](http://www.jfrog.com/home/v_artifactory_opensource_overview)).
+No public repo for jawamp available yet. To install jawamp in local repo pull jawamp from github and run maven:
 
-Add jawamp dependency:
+```
+mvn install
+```
+
+> You may also want to deploy jawamp on local server (take a look at [Artifactory](http://www.jfrog.com/home/v_artifactory_opensource_overview)).
+
+Add jawamp dependency to your maven project:
 
 ```xml
 <dependency>
@@ -20,4 +26,6 @@ Add jawamp dependency:
 </dependency>
 ```
 
-NOTE: jawamp depends on `slf4j-api` and `gson`. In tests jawamp uses [jetty](http://jetty.codehaus.org/jetty/) as transport.
+> jawamp depends on `slf4j-api` and `gson`. In tests jawamp uses [jetty](http://jetty.codehaus.org/jetty/) as transport.
+
+Now you are ready to use jawamp as server or client or both. To get started take a look at this [short tutorial](https://github.com/rgmih/jawamp/wiki/Tutorial).
