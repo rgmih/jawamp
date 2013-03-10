@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.rgmih.jawamp.message.Message;
+import com.github.rgmih.jawamp.message.PublishMessage;
 import com.google.gson.JsonElement;
 
 /**
@@ -114,6 +115,16 @@ public class Server {
 	void onConnectionClosed(ServerConnection connection) {
 		for (Listener listener : listeners) {
 			listener.onConnectionClosed(connection);
+		}
+	}
+	
+	/**
+	 * Provides a way to publish messages on server side anonymously.
+	 * @param message Message to be published
+	 */
+	public void publish(PublishMessage message) {
+		for (Listener listener : listeners) {
+			listener.onMessage(message);
 		}
 	}
 }

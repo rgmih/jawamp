@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,6 +26,12 @@ import com.github.rgmih.jawamp.message.WelcomeMessage;
 
 public abstract class ServerConnection extends Connection {
 	
+	@Override
+	protected void onClose() {
+		server.onConnectionClosed(this);
+		super.onClose();
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(ServerConnection.class);
 	
 	private final Server server;
