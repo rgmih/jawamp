@@ -45,11 +45,14 @@ public class GenericTest {
 		factory.stop();
 	}
 	
+	private int port;
+	
 	@Before
     public void setUp() throws Exception {
-		jetty = new Server(8081);
+		jetty = new Server(0);
 		jetty.setHandler(new JettyHandler());
 		jetty.start();
+		port = jetty.getConnectors()[0].getLocalPort();
     }
 
     @After
@@ -73,7 +76,7 @@ public class GenericTest {
 		WebSocketClient client = createClient();
 		
 		welcomeReceived = false;
-		WebSocket.Connection connection = client.open(new URI("ws://localhost:8081/"), new WebSocket.OnTextMessage() {
+		WebSocket.Connection connection = client.open(new URI("ws://localhost:" + port), new WebSocket.OnTextMessage() {
 			@Override
 			public void onOpen(Connection connection) {}
 			
@@ -97,7 +100,7 @@ public class GenericTest {
 		WebSocketClient wsClient = createClient();
 		
 		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) client).get();
 		Future<CallResult> future = client.call("http://example.com/add", new JsonPrimitive(2), new JsonPrimitive(3));
 		try {
 			CallResult result = future.get();
@@ -115,7 +118,7 @@ public class GenericTest {
 		WebSocketClient wsClient = createClient();
 		
 		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) client).get();
 		Future<CallResult> future = client.call("http://example.com/error");
 		try {
 			future.get();
@@ -136,7 +139,7 @@ public class GenericTest {
 		WebSocketClient wsClient = createClient();
 		
 		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) client).get();
 		client.bindPrefix("p", "http://example.com/");
 		Future<CallResult> future = client.call("p:add", new JsonPrimitive(4), new JsonPrimitive(-2));
 		try {
@@ -160,7 +163,7 @@ public class GenericTest {
     	WebSocketClient wsClient = createClient();
 		
 		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) client).get();
 		Future<CallResult> future = client.call("http://example.com/error");
 		try {
 			future.get();
@@ -178,7 +181,7 @@ public class GenericTest {
     public void testPubSub() throws Exception {
     	WebSocketClient wsClient = createClient();
 		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) client).get();
 		
 		client.subscribe("http://example.com/topic", new Client.Subscriber() {
 			@Override
@@ -200,7 +203,7 @@ public class GenericTest {
     public void testPublishExcludeMe() throws Exception {
     	WebSocketClient wsClient = createClient();
 		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) client).get();
 		
 		client.subscribe("http://example.com/topic", new Client.Subscriber() {
 			@Override
@@ -220,7 +223,7 @@ public class GenericTest {
     public void testPublishExclude() throws Exception {
     	WebSocketClient wsClient = createClient();
 		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) client).get();
 		
 		client.subscribe("http://example.com/topic", new Client.Subscriber() {
 			@Override
@@ -245,9 +248,9 @@ public class GenericTest {
     public void testPublishEligible() throws Exception {
     	WebSocketClient wsClient = createClient();
 		Client clientA = new JettyClient();
-		WebSocket.Connection connectionA = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) clientA).get();
+		WebSocket.Connection connectionA = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) clientA).get();
 		Client clientB = new JettyClient();
-		WebSocket.Connection connectionB = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) clientB).get();
+		WebSocket.Connection connectionB = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) clientB).get();
 		receivedA = false;
 		receivedB = false;
 		clientA.subscribe("http://example.com/topic", new Client.Subscriber() {
@@ -282,7 +285,7 @@ public class GenericTest {
     public void testUnsubscribe() throws Exception {
     	WebSocketClient wsClient = createClient();
 		Client client = new JettyClient();
-		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:8081/"), (JettyClient) client).get();
+		WebSocket.Connection connection = wsClient.open(new URI("ws://localhost:" + port), (JettyClient) client).get();
 		
 		client.subscribe("http://example.com/topic", new Client.Subscriber() {
 			@Override
