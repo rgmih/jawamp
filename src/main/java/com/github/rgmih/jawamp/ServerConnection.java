@@ -24,7 +24,6 @@ import com.github.rgmih.jawamp.message.SubscribeMessage;
 import com.github.rgmih.jawamp.message.UnsubscribeMessage;
 import com.github.rgmih.jawamp.message.WelcomeMessage;
 
-
 public abstract class ServerConnection extends Connection {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ServerConnection.class);

@@ -29,6 +29,9 @@ import com.github.rgmih.jawamp.message.UnsubscribeMessage;
 import com.github.rgmih.jawamp.message.WelcomeMessage;
 import com.google.gson.JsonElement;
 
+/**
+ * Client connection base class.
+ */
 public abstract class Client extends Connection {
 
 	private static final Logger logger = LoggerFactory.getLogger(Client.class);

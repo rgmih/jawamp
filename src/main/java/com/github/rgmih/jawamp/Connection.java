@@ -5,10 +5,13 @@ import java.io.IOException;
 import com.github.rgmih.jawamp.message.Message;
 import com.github.rgmih.jawamp.util.MessageAdapter;
 
+/**
+ * Base abstract class for both server and client WAMP connections.
+ * It shouldn't be used as is, inherit {@link ServerConnection} or
+ * {@link Client} instead.
+ */
 public abstract class Connection {
 
-	// private static final Logger logger = LoggerFactory.getLogger(Connection.class);
-	
 	protected void onOpen() {}
 	
 	protected void onClose() {}

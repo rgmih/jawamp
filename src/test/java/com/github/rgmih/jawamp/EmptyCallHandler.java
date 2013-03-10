@@ -2,7 +2,6 @@ package com.github.rgmih.jawamp;
 
 import java.util.List;
 
-import com.github.rgmih.jawamp.Server.CallHandler;
 import com.google.gson.JsonElement;
 
 public class EmptyCallHandler implements CallHandler {

@@ -17,9 +17,9 @@ public class JettyHandler extends WebSocketHandler {
 	private Server server = new Server();
 	
 	public JettyHandler() {
-		server.addHandler("http://example.com/empty", new EmptyCallHandler());
-		server.addHandler("http://example.com/add", new AddCallHandler());
-		server.addHandler("http://example.com/error", new ErrorCallHandler());
+		server.registerHandler("http://example.com/empty", new EmptyCallHandler());
+		server.registerHandler("http://example.com/add", new AddCallHandler());
+		server.registerHandler("http://example.com/error", new ErrorCallHandler());
 	}
 	
 	private class WampWebSocket extends ServerConnection implements OnTextMessage {
