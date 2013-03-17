@@ -44,7 +44,11 @@ public abstract class Client extends Connection {
 
 	private static final Logger logger = LoggerFactory.getLogger(Client.class);
 	
-	private ExecutorService threadpool = Executors.newCachedThreadPool();
+	protected final ExecutorService threadpool;
+	
+	public Client(ExecutorService threadpool) {
+		this.threadpool = threadpool;
+	}
 	
 	private class Call implements Callable<CallResult> {
 		final Lock lock = new ReentrantLock();
